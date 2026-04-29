@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "noEmit": false,
+    "outDir": "dist-runtime",
+    "declaration": false,
+    "declarationMap": false,
+    "noImplicitAny": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "main.ts",
+    "server.ts",
+    "scripts/manual/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-runtime",
+    "ui"
+  ]
+}

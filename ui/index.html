@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/logo-mark.svg" type="image/svg+xml" />
+    <title>SuccessFactors Instance Explorer</title>
+    <link rel="stylesheet" href="./style.css">
+    <script type="module" src="./main.ts"></script>
+</head>
+<body>
+    <ui5-shellbar
+        id="app-shellbar"
+        primary-title="SuccessFactors Instance Explorer"
+    >
+        <img
+            slot="logo"
+            class="app-shell-logo"
+            src="/logo-mark.svg"
+            width="32"
+            height="32"
+            alt=""
+            aria-hidden="true"
+        />
+    </ui5-shellbar>
+
+    <div class="app-container" id="app-container">
+        <div class="main-column">
+            <nav class="workspace-switcher" aria-label="Main workspace">
+                <button type="button" class="workspace-tab active" data-workspace="overview" id="tab-overview">Overview</button>
+                <button type="button" class="workspace-tab" data-workspace="graph" id="tab-graph">Graph</button>
+                <button type="button" class="workspace-tab" data-workspace="rbp-flow" id="tab-rbp-flow">RBP Flow</button>
+                <div class="explore-tab-wrap">
+                    <button type="button" class="workspace-tab" data-workspace="explore" id="tab-explore">Explore ▾</button>
+                    <ui5-popover id="explore-popover" placement-type="Bottom" hide-arrow>
+                        <ui5-list id="explore-popover-list" mode="None">
+                            <ui5-li data-explore-view="objects" icon="business-objects-experience">Objects</ui5-li>
+                            <ui5-li data-explore-view="rules" icon="decision">Rules</ui5-li>
+                            <ui5-li data-explore-view="roles" icon="role">Roles</ui5-li>
+                            <ui5-li data-explore-view="odata" icon="connected">OData</ui5-li>
+                            <ui5-li data-explore-view="workflows" icon="workflow-tasks">Workflows</ui5-li>
+                        </ui5-list>
+                    </ui5-popover>
+                </div>
+                <button type="button" class="workspace-tab" data-workspace="roles-matrix" id="tab-roles-matrix">ROFP Matrix</button>
+                <button type="button" class="workspace-tab" data-workspace="compare" id="tab-compare">Compare</button>
+                <button type="button" class="workspace-tab" data-workspace="import" id="tab-import">Import</button>
+                <div class="workspace-switcher-spacer"></div>
+                <div id="split-compare-strip" class="split-compare-strip split-compare-strip--inline" hidden aria-live="polite"></div>
+                <button type="button" class="workspace-tab projects-tab" data-workspace="projects" id="tab-projects">Projects</button>
+            </nav>
+
+            <div id="compare-overlay-bar-mount"></div>
+
+            <section id="workspace-graph" class="workspace-panel" aria-labelledby="tab-graph">
+                <div class="graph-layout">
+                    <div class="graph-workspace-main">
+                        <div class="graph-chrome-stack">
+                        <div class="workspace-toolbar">
+                            <div class="toolbar-strip">
+                                <div class="toolbar-leading">
+                                    <ui5-button id="controls-toggle" design="Transparent" icon="hide">Hide Controls</ui5-button>
+                                </div>
+                                <div class="active-scope" id="active-scope">Overview</div>
+                                <div class="toolbar-actions">
+                                    <ui5-button icon="zoom-in" design="Transparent" id="zoom-in"></ui5-button>
+                                    <ui5-button icon="zoom-out" design="Transparent" id="zoom-out"></ui5-button>
+                                    <ui5-button icon="refresh" design="Transparent" id="reset-zoom" tooltip="Reset zoom"></ui5-button>
+                                </div>
+                            </div>
+
+                            <div class="toolbar-content" id="toolbar-content">
+                                <div class="toolbar-row">
+                                    <ui5-button id="modules-toggle" design="Default">Modules</ui5-button>
+                                    <div class="graph-finder-shell">
+                                        <div class="search-box">
+                                            <input id="graph-finder-input" class="perm-filter-search" type="search" placeholder="Find node in graph..." autocomplete="off">
+                                            <button class="search-clear" id="graph-finder-clear" type="button">Clear</button>
+                                        </div>
+                                        <div class="graph-finder-results hidden" id="graph-finder-results"></div>
+                                        <div class="graph-focus-list hidden" id="graph-focus-list"></div>
+                                    </div>
+                                </div>
+
+                                <div class="module-bar hidden" id="module-bar"></div>
+
+                                <div class="submodule-bar hidden" id="submodule-bar"></div>
+
+                                <div class="toolbar-row secondary">
+                                    <div class="toolbar-secondary-leading">
+                                        <div class="view-kind-switcher" id="view-kind-switcher">
+                                            <button class="view-kind-btn active" data-view-kind="suite" type="button" title="Suite Architecture — structural overview of all modules">Suite</button>
+                                            <button class="view-kind-btn" data-view-kind="blueprint" type="button" title="Module Blueprint — 4-column object/rule/API breakdown for a module">Blueprint</button>
+                                            <button class="view-kind-btn" data-view-kind="drilldown" type="button" title="Object Drilldown — force layout for node neighborhoods">Drilldown</button>
+                                        </div>
+                                        <div class="view-breadcrumb" id="view-breadcrumb"></div>
+                                    </div>
+                                    <div class="toolbar-graph-toggles" id="drilldown-toggles">
+                                        <ui5-segmented-button id="view-switcher">
+                                            <ui5-segmented-button-item selected data-view="all">All</ui5-segmented-button-item>
+                                            <ui5-segmented-button-item data-view="MDF_OBJECT">Objects</ui5-segmented-button-item>
+                                            <ui5-segmented-button-item data-view="BUSINESS_RULE">Rules</ui5-segmented-button-item>
+                                            <ui5-segmented-button-item data-view="RBP_ROLE">Roles</ui5-segmented-button-item>
+                                            <ui5-segmented-button-item data-view="ODATA_ENTITY">OData</ui5-segmented-button-item>
+                                        </ui5-segmented-button>
+                                        <div class="object-class-bar" id="object-class-bar"></div>
+                                        <button class="toolbar-chip" id="toggle-role-links" type="button" title="Adds synthetic permission edges between RBP roles and MDF objects. Off by default for All modules so the graph stays readable.">Show role permission links</button>
+                                        <button class="toolbar-chip" id="toggle-isolated" type="button">Show hidden low-signal nodes</button>
+                                        <button class="toolbar-chip" id="reset-layout" type="button" title="Clear manually pinned node positions for this view and re-render">Reset layout</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="graph-canvas-area">
+                        <ui5-button id="role-rail-show" class="role-rail-show-toggle hidden" design="Transparent" icon="menu2">Show roles panel</ui5-button>
+                        <div class="workspace-split graph-canvas-split" id="graph-canvas-split">
+                        <div class="workspace-split-pane graph-split-pane" data-pane="left">
+                        <div class="split-pane-instance-label" id="graph-split-label-left" hidden>
+                            <span class="split-pane-instance-name"></span>
+                            <span class="split-pane-instance-role">Base instance</span>
+                        </div>
+                        <div class="graph-pane-controls" id="graph-pane-controls-left" hidden></div>
+                        <div class="graph-pane-body" id="graph-pane-body-left">
+                            <aside id="role-rail" class="role-rail hidden" aria-label="RBP roles">
+                                <div class="role-rail-header">
+                                    <div class="role-rail-head">
+                                        <h3 class="role-rail-title">Roles</h3>
+                                        <button type="button" class="toolbar-button role-rail-toggle" id="role-rail-hide">Hide panel</button>
+                                    </div>
+                                    <p class="role-rail-hint">Select a role to map its object permissions on the graph.</p>
+                                    <div class="role-rail-metrics" id="role-rail-metrics"></div>
+                                    <input id="role-rail-search" class="role-rail-search" type="search" placeholder="Filter roles by name or id" autocomplete="off">
+                                    <button type="button" class="toolbar-button role-rail-clear" id="role-rail-clear-focus">Clear graph focus</button>
+                                </div>
+                                <div class="role-rail-list" id="role-rail-list"></div>
+                            </aside>
+                            <div class="graph-viewport">
+                            <div class="overview-state" id="overview-state">
+                                <div class="overview-card">
+                                    <p class="eyebrow">Architect View</p>
+                                    <h2>Choose a module or open Explore</h2>
+                                    <p class="overview-copy">
+                                        The graph opens in overview mode. <strong>All modules</strong> defaults to a structural view without the full RBP permission mesh—use <strong>Show role permission links</strong> when you need roles wired to objects. For <strong>Roles</strong>, pick a role from the list to see a readable permission map. Use <strong>Explore</strong> (with optional deep search) to find entities and jump back to the graph.
+                                    </p>
+                                    <div class="module-card-grid" id="overview-modules"></div>
+                                </div>
+                            </div>
+
+                            <div class="roles-graph-placeholder hidden" id="roles-graph-placeholder">
+                                <div class="roles-graph-placeholder-card">
+                                    <p class="eyebrow">Roles view</p>
+                                    <h2>Select a role</h2>
+                                    <p class="overview-copy">Choose a role in the list to render its MDF permission links and local neighborhood. Sorting is by permission count (busiest first).</p>
+                                </div>
+                            </div>
+
+                            <div id="graph-canvas"></div>
+                            </div><!-- .graph-viewport -->
+                        </div><!-- .graph-pane-body -->
+
+                        <footer class="graph-shell-footer" id="graph-legend-footer" aria-label="Graph status and legend">
+                        <ui5-button id="legend-hide" class="legend-hide-btn">Hide</ui5-button>
+                        <div class="graph-status hidden" id="graph-status"></div>
+                        <div class="graph-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot mdf"></div>
+                                Object
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot rule"></div>
+                                Business Rule
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot role"></div>
+                                RBP Role
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot odata"></div>
+                                OData Entity
+                            </div>
+                        </div>
+                        <div class="graph-footer-zoom" aria-label="Zoom base graph pane">
+                            <ui5-button design="Transparent" icon="zoom-in" id="graph-zoom-in-left" tooltip="Zoom in (base)"></ui5-button>
+                            <ui5-button design="Transparent" icon="zoom-out" id="graph-zoom-out-left" tooltip="Zoom out (base)"></ui5-button>
+                            <ui5-button design="Transparent" icon="refresh" id="graph-zoom-reset-left" tooltip="Reset zoom (base)"></ui5-button>
+                        </div>
+                        <div class="graph-minimap-host" id="graph-minimap-host" aria-hidden="true"></div>
+                        </footer>
+                        </div><!-- .workspace-split-pane left -->
+
+                        <div class="workspace-split-pane graph-split-pane workspace-split-pane--right" data-pane="right">
+                        <div class="split-pane-instance-label" id="graph-split-label-right" hidden>
+                            <span class="split-pane-instance-name"></span>
+                            <span class="split-pane-instance-role">Target instance</span>
+                        </div>
+                        <div class="graph-pane-controls" id="graph-pane-controls-right" hidden></div>
+                        <div class="graph-pane-body" id="graph-pane-body-right">
+                            <aside id="role-rail-target" class="role-rail role-rail--target hidden" aria-label="Target instance RBP roles">
+                                <div class="role-rail-header">
+                                    <div class="role-rail-head">
+                                        <h3 class="role-rail-title">Roles (target)</h3>
+                                        <button type="button" class="toolbar-button role-rail-toggle" id="role-rail-hide-target">Hide panel</button>
+                                    </div>
+                                    <p class="role-rail-hint">Pick a role in the <strong>target</strong> instance for this pane. IDs differ per tenant.</p>
+                                    <div class="role-rail-metrics" id="role-rail-metrics-target"></div>
+                                    <input id="role-rail-search-target" class="role-rail-search" type="search" placeholder="Filter target roles" autocomplete="off">
+                                    <button type="button" class="toolbar-button role-rail-clear" id="role-rail-clear-focus-target">Clear target role</button>
+                                </div>
+                                <div class="role-rail-list" id="role-rail-list-target"></div>
+                            </aside>
+                            <div class="graph-viewport graph-viewport--compare-right" id="graph-viewport-right">
+                            <div class="overview-state hidden" id="overview-state-right">
+                                <div class="overview-card">
+                                    <p class="eyebrow">Architect View (compare)</p>
+                                    <h2>Choose a module or open Explore</h2>
+                                    <p class="overview-copy">Target instance graph. Controls above apply to both panes.</p>
+                                    <div class="module-card-grid" id="overview-modules-right"></div>
+                                </div>
+                            </div>
+
+                            <div class="roles-graph-placeholder hidden" id="roles-graph-placeholder-right">
+                                <div class="roles-graph-placeholder-card">
+                                    <p class="eyebrow">Roles view</p>
+                                    <h2>Select a role</h2>
+                                    <p class="overview-copy">Choose a role in the list to render its MDF permission links and local neighborhood.</p>
+                                </div>
+                            </div>
+
+                            <div id="graph-canvas-right"></div>
+                            </div><!-- .graph-viewport-right -->
+                        </div><!-- .graph-pane-body -->
+
+                        <footer class="graph-shell-footer" id="graph-legend-footer-right" aria-label="Graph status and legend (compare target)">
+                        <ui5-button id="legend-hide-right" class="legend-hide-btn">Hide</ui5-button>
+                        <div class="graph-status hidden" id="graph-status-right"></div>
+                        <div class="graph-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot mdf"></div>
+                                Object
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot rule"></div>
+                                Business Rule
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot role"></div>
+                                RBP Role
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot odata"></div>
+                                OData Entity
+                            </div>
+                        </div>
+                        <div class="graph-footer-zoom" aria-label="Zoom target graph pane">
+                            <ui5-button design="Transparent" icon="zoom-in" id="graph-zoom-in-right" tooltip="Zoom in (target)"></ui5-button>
+                            <ui5-button design="Transparent" icon="zoom-out" id="graph-zoom-out-right" tooltip="Zoom out (target)"></ui5-button>
+                            <ui5-button design="Transparent" icon="refresh" id="graph-zoom-reset-right" tooltip="Reset zoom (target)"></ui5-button>
+                        </div>
+                        <div class="graph-minimap-host" id="graph-minimap-host-right" aria-hidden="true"></div>
+                        </footer>
+                        </div><!-- .workspace-split-pane right -->
+                        </div><!-- .workspace-split -->
+                        </div><!-- .graph-canvas-area -->
+                        </div><!-- .graph-chrome-stack -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="workspace-overview" class="workspace-panel workspace-overview" hidden aria-labelledby="tab-overview">
+                <div class="workspace-split workspace-split--overview" id="workspace-overview-split">
+                    <div class="workspace-split-pane workspace-split-pane--left" data-pane="left">
+                        <div class="split-pane-instance-label" id="overview-split-label-left" hidden>
+                            <span class="split-pane-instance-name"></span>
+                            <span class="split-pane-instance-role">Base instance</span>
+                        </div>
+                        <div id="dashboard-root" class="dashboard-root-mount"></div>
+                    </div>
+                    <div class="workspace-split-pane workspace-split-pane--right" data-pane="right">
+                        <div class="split-pane-instance-label" id="overview-split-label-right" hidden>
+                            <span class="split-pane-instance-name"></span>
+                            <span class="split-pane-instance-role">Target instance</span>
+                        </div>
+                        <div id="dashboard-root-right" class="dashboard-root-mount"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="workspace-explore" class="workspace-panel" hidden aria-labelledby="tab-explore">
+                <div class="workspace-split workspace-split--explore" id="workspace-explore-split">
+                    <div class="workspace-split-pane workspace-split-pane--left" data-pane="left">
+                <div class="workspace-page explore-workspace">
+                    <div class="split-pane-instance-label" id="explore-split-label-left" hidden>
+                        <span class="split-pane-instance-name"></span>
+                        <span class="split-pane-instance-role">Base instance</span>
+                    </div>
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title" id="explore-page-title">Explorer</h2>
+                        <p class="workspace-page-lead" id="explore-page-lead">Browse all entities in the loaded instance.</p>
+                    </header>
+                    <nav class="explore-subnav" id="explore-subnav" aria-label="Explorer sub-views">
+                        <button type="button" class="explore-subnav-pill active" data-explore-view="objects">Objects</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="rules">Rules</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="roles">Roles</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="odata">OData</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="workflows">Workflows</button>
+                    </nav>
+                    <div class="explore-metric-bar metric-bar" id="explore-metric-bar"></div>
+                    <div class="explore-matrix-strip hidden" id="explore-matrix-strip" aria-label="Permission matrix shortcut"></div>
+                    <div class="explore-toolbar" id="explore-toolbar">
+                        <div class="explore-toolbar-inner">
+                            <label class="explore-field"><span class="explore-field-label">Sort by</span><ui5-select id="explore-sort" class="explore-ui5-select" accessible-name="Sort list"></ui5-select></label>
+                            <label class="explore-field" id="explore-module-field"><span class="explore-field-label">Module</span><ui5-select id="explore-module-filter" class="explore-ui5-select" accessible-name="Filter by module"></ui5-select></label>
+                            <label class="explore-field hidden" id="explore-class-field"><span class="explore-field-label">Object class</span><ui5-select id="explore-class-filter" class="explore-ui5-select" accessible-name="Filter by object class"></ui5-select></label>
+                            <label class="explore-field hidden" id="explore-ns-field"><span class="explore-field-label">Namespace</span><ui5-select id="explore-ns-filter" class="explore-ui5-select" accessible-name="Filter OData namespace"></ui5-select></label>
+                            <label class="explore-field explore-deep"><input type="checkbox" id="explore-deep-search"><span>Match fields &amp; permissions (deep)</span></label>
+                        </div>
+                    </div>
+                    <div class="workflow-search-shell workflow-search-page explore-search-shell">
+                        <input id="explore-search" type="search" placeholder="Search labels, ids, tags…">
+                    </div>
+                    <div class="explore-stack">
+                    <div class="explore-list workflow-list-page" id="explore-list">
+                        <div class="empty-mini">Select a view above to browse entities.</div>
+                    </div>
+                    <div class="explore-detail-inline hidden" id="explore-detail-inline-left" aria-live="polite">
+                        <div class="explore-detail-inline-toolbar">
+                            <span class="explore-detail-inline-title" id="explore-detail-inline-title-left">Detail · base instance</span>
+                            <button type="button" class="toolbar-button" id="explore-detail-close-left">Close</button>
+                        </div>
+                        <div class="explore-detail-inline-body" id="explore-detail-inline-body-left"></div>
+                    </div>
+                    </div>
+                </div>
+                    </div>
+                    <div class="workspace-split-pane workspace-split-pane--right" data-pane="right">
+                <div class="workspace-page explore-workspace explore-workspace--right">
+                    <div class="split-pane-instance-label" id="explore-split-label-right" hidden>
+                        <span class="split-pane-instance-name"></span>
+                        <span class="split-pane-instance-role">Target instance</span>
+                    </div>
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title" id="explore-page-title-right">Explorer (compare)</h2>
+                        <p class="workspace-page-lead" id="explore-page-lead-right">Target instance.</p>
+                    </header>
+                    <nav class="explore-subnav" id="explore-subnav-right" aria-label="Explorer sub-views (compare)">
+                        <button type="button" class="explore-subnav-pill active" data-explore-view="objects">Objects</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="rules">Rules</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="roles">Roles</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="odata">OData</button>
+                        <button type="button" class="explore-subnav-pill" data-explore-view="workflows">Workflows</button>
+                    </nav>
+                    <div class="explore-metric-bar metric-bar" id="explore-metric-bar-right"></div>
+                    <div class="explore-matrix-strip hidden" id="explore-matrix-strip-right" aria-label="Permission matrix shortcut"></div>
+                    <div class="explore-toolbar" id="explore-toolbar-right">
+                        <div class="explore-toolbar-inner">
+                            <label class="explore-field"><span class="explore-field-label">Sort by</span><ui5-select id="explore-sort-right" class="explore-ui5-select" accessible-name="Sort list"></ui5-select></label>
+                            <label class="explore-field" id="explore-module-field-right"><span class="explore-field-label">Module</span><ui5-select id="explore-module-filter-right" class="explore-ui5-select" accessible-name="Filter by module"></ui5-select></label>
+                            <label class="explore-field hidden" id="explore-class-field-right"><span class="explore-field-label">Object class</span><ui5-select id="explore-class-filter-right" class="explore-ui5-select" accessible-name="Filter by object class"></ui5-select></label>
+                            <label class="explore-field hidden" id="explore-ns-field-right"><span class="explore-field-label">Namespace</span><ui5-select id="explore-ns-filter-right" class="explore-ui5-select" accessible-name="Filter OData namespace"></ui5-select></label>
+                            <label class="explore-field explore-deep"><input type="checkbox" id="explore-deep-search-right"><span>Match fields &amp; permissions (deep)</span></label>
+                        </div>
+                    </div>
+                    <div class="workflow-search-shell workflow-search-page explore-search-shell">
+                        <input id="explore-search-right" type="search" placeholder="Search labels, ids, tags…">
+                    </div>
+                    <div class="explore-stack">
+                    <div class="explore-list workflow-list-page" id="explore-list-right">
+                        <div class="empty-mini">Select a view above to browse entities.</div>
+                    </div>
+                    <div class="explore-detail-inline hidden" id="explore-detail-inline-right" aria-live="polite">
+                        <div class="explore-detail-inline-toolbar">
+                            <span class="explore-detail-inline-title" id="explore-detail-inline-title-right">Detail · target instance</span>
+                            <button type="button" class="toolbar-button" id="explore-detail-close-right">Close</button>
+                        </div>
+                        <div class="explore-detail-inline-body" id="explore-detail-inline-body-right"></div>
+                    </div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="workspace-roles-matrix" class="workspace-panel" hidden aria-labelledby="tab-roles-matrix">
+                <div class="workspace-split workspace-split--roles-matrix" id="workspace-roles-matrix-split">
+                    <div class="workspace-split-pane workspace-split-pane--left" data-pane="left">
+                <div class="workspace-page roles-matrix-workspace">
+                    <header class="workspace-page-header workspace-page-header--compact">
+                        <h2 class="workspace-page-title">ROFP Matrix</h2>
+                        <div class="split-pane-instance-label split-pane-instance-label--in-header" id="matrix-split-label-left" hidden>
+                            <span class="split-pane-instance-name"></span>
+                            <span class="split-pane-instance-role">Base instance</span>
+                        </div>
+                    </header>
+                    <div class="roles-matrix-host-outer">
+                        <div class="roles-matrix-host" id="roles-matrix-container">
+                            <div class="empty-mini">Upload RBP permission CSV files in Import to populate the matrix.</div>
+                        </div>
+                        <div id="perm-matrix-loading-overlay" class="perm-matrix-loading-overlay" hidden aria-busy="true" aria-live="polite">
+                            <div class="perm-matrix-loading-card">
+                                <p class="perm-matrix-loading-title">Updating permission matrix</p>
+                                <p class="perm-matrix-loading-sub" id="perm-matrix-loading-sub">Preparing…</p>
+                                <div class="perm-matrix-progress" role="progressbar" aria-label="Loading">
+                                    <div class="perm-matrix-progress-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="perm-detail-drawer perm-detail-drawer--compare perm-detail-drawer--compare-left" id="perm-detail-drawer-left" aria-label="Left project permission detail">
+                            <div class="perm-drawer-header">
+                                <div>
+                                    <p class="perm-drawer-project" id="perm-drawer-project-left" hidden></p>
+                                    <h3 class="perm-drawer-title" id="perm-drawer-title-left"></h3>
+                                    <p class="perm-drawer-subtitle" id="perm-drawer-subtitle-left"></p>
+                                </div>
+                                <button type="button" class="perm-drawer-close" id="perm-drawer-close-left" title="Close detail panel">✕</button>
+                            </div>
+                            <div class="perm-drawer-content" id="perm-drawer-content-left"></div>
+                        </aside>
+                        <aside class="perm-detail-drawer" id="perm-detail-drawer" aria-label="Permission detail">
+                            <div class="perm-drawer-header">
+                                <div>
+                                    <p class="perm-drawer-project" id="perm-drawer-project" hidden></p>
+                                    <h3 class="perm-drawer-title" id="perm-drawer-title"></h3>
+                                    <p class="perm-drawer-subtitle" id="perm-drawer-subtitle"></p>
+                                </div>
+                                <button type="button" class="perm-drawer-close" id="perm-drawer-close" title="Close detail panel">✕</button>
+                            </div>
+                            <div class="perm-drawer-content" id="perm-drawer-content"></div>
+                        </aside>
+                    </div>
+                </div>
+                    </div>
+                    <div class="workspace-split-pane workspace-split-pane--right" data-pane="right">
+                <div class="workspace-page roles-matrix-workspace roles-matrix-workspace--right">
+                    <header class="workspace-page-header workspace-page-header--compact">
+                        <h2 class="workspace-page-title" id="roles-matrix-title-right">ROFP Matrix (compare)</h2>
+                        <div class="split-pane-instance-label split-pane-instance-label--in-header" id="matrix-split-label-right" hidden>
+                            <span class="split-pane-instance-name"></span>
+                            <span class="split-pane-instance-role">Target instance</span>
+                        </div>
+                    </header>
+                    <div class="roles-matrix-host-outer">
+                        <div class="roles-matrix-host" id="roles-matrix-container-right">
+                            <div class="empty-mini">Upload RBP permission CSV files in Import to populate the matrix.</div>
+                        </div>
+                        <div id="perm-matrix-loading-overlay-right" class="perm-matrix-loading-overlay" hidden aria-busy="true" aria-live="polite">
+                            <div class="perm-matrix-loading-card">
+                                <p class="perm-matrix-loading-title">Updating permission matrix</p>
+                                <p class="perm-matrix-loading-sub" id="perm-matrix-loading-sub-right">Preparing…</p>
+                                <div class="perm-matrix-progress" role="progressbar" aria-label="Loading">
+                                    <div class="perm-matrix-progress-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="perm-detail-drawer perm-detail-drawer--compare perm-detail-drawer--compare-right" id="perm-detail-drawer-right" aria-label="Right project permission detail">
+                            <div class="perm-drawer-header">
+                                <div>
+                                    <p class="perm-drawer-project" id="perm-drawer-project-right" hidden></p>
+                                    <h3 class="perm-drawer-title" id="perm-drawer-title-right"></h3>
+                                    <p class="perm-drawer-subtitle" id="perm-drawer-subtitle-right"></p>
+                                </div>
+                                <button type="button" class="perm-drawer-close" id="perm-drawer-close-right" title="Close detail panel">✕</button>
+                            </div>
+                            <div class="perm-drawer-content" id="perm-drawer-content-right"></div>
+                        </aside>
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="workspace-workflows" class="workspace-panel" hidden aria-labelledby="tab-workflows">
+                <div class="workspace-split workspace-split--workflows" id="workspace-workflows-split">
+                    <div class="workspace-split-pane workspace-split-pane--left" data-pane="left">
+                <div class="workspace-page workflow-workspace">
+                    <div class="split-pane-instance-label" id="workflow-split-label-left" hidden>
+                        <span class="split-pane-instance-name"></span>
+                        <span class="split-pane-instance-role">Base instance</span>
+                    </div>
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title">Workflow Explorer</h2>
+                        <p class="workspace-page-lead">Browse workflow definitions from your instance export.</p>
+                    </header>
+                    <div class="workflow-workspace-metrics metric-bar">
+                        <div class="metric-row">
+                            <span class="metric-label">Workflow Definitions</span>
+                            <span class="metric-value" id="stat-workflows">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Average Steps</span>
+                            <span class="metric-value" id="stat-workflow-avg">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Dynamic Assignment</span>
+                            <span class="metric-value" id="stat-workflow-dynamic">-</span>
+                        </div>
+                    </div>
+                    <p class="workflow-reuse-hint empty-mini hidden" id="workflow-reuse-hint" role="status"></p>
+                    <div class="workflow-search-shell workflow-search-page">
+                        <input id="workflow-search" type="search" placeholder="Search workflow code or name">
+                    </div>
+                    <div class="workflow-list workflow-list-page" id="workflow-list">
+                        <div class="empty-mini">Workflow definitions will appear here.</div>
+                    </div>
+                    <div class="explore-detail-inline workflow-detail-inline hidden" id="workflow-detail-inline-left" aria-live="polite">
+                        <div class="explore-detail-inline-toolbar">
+                            <span class="explore-detail-inline-title" id="workflow-detail-inline-title-left">Workflow detail · base instance</span>
+                            <button type="button" class="toolbar-button" id="workflow-detail-close-left">Back</button>
+                        </div>
+                        <div class="explore-detail-inline-body" id="workflow-detail-inline-body-left"></div>
+                    </div>
+                </div>
+                    </div>
+                    <div class="workspace-split-pane workspace-split-pane--right" data-pane="right">
+                <div class="workspace-page workflow-workspace workflow-workspace--right">
+                    <div class="split-pane-instance-label" id="workflow-split-label-right" hidden>
+                        <span class="split-pane-instance-name"></span>
+                        <span class="split-pane-instance-role">Target instance</span>
+                    </div>
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title" id="workflow-page-title-right">Workflow Explorer</h2>
+                        <p class="workspace-page-lead" id="workflow-page-lead-right">Target instance workflows.</p>
+                    </header>
+                    <div class="workflow-workspace-metrics metric-bar">
+                        <div class="metric-row">
+                            <span class="metric-label">Workflow Definitions</span>
+                            <span class="metric-value" id="stat-workflows-right">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Average Steps</span>
+                            <span class="metric-value" id="stat-workflow-avg-right">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Dynamic Assignment</span>
+                            <span class="metric-value" id="stat-workflow-dynamic-right">-</span>
+                        </div>
+                    </div>
+                    <p class="workflow-reuse-hint empty-mini hidden" id="workflow-reuse-hint-right" role="status"></p>
+                    <div class="workflow-search-shell workflow-search-page">
+                        <input id="workflow-search-right" type="search" placeholder="Search target workflows">
+                    </div>
+                    <div class="workflow-list workflow-list-page" id="workflow-list-right">
+                        <div class="empty-mini">Use the Compare tab to load two projects side by side.</div>
+                    </div>
+                    <div class="explore-detail-inline workflow-detail-inline hidden" id="workflow-detail-inline-right" aria-live="polite">
+                        <div class="explore-detail-inline-toolbar">
+                            <span class="explore-detail-inline-title" id="workflow-detail-inline-title-right">Workflow detail · target instance</span>
+                            <button type="button" class="toolbar-button" id="workflow-detail-close-right">Back</button>
+                        </div>
+                        <div class="explore-detail-inline-body" id="workflow-detail-inline-body-right"></div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── IMPORT WORKSPACE ──────────────────────────────────────── -->
+            <section id="workspace-import" class="workspace-panel" hidden aria-labelledby="tab-import">
+                <div class="workspace-page import-workspace">
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title">Import Instance Files</h2>
+                        <p class="workspace-page-lead">Upload your SuccessFactors export files to process a new instance. Object Definitions zip is required; all other files are optional but unlock additional features.</p>
+                    </header>
+
+                    <div class="import-project-bar" id="import-project-bar">
+                        <span class="import-project-label">Active project:</span>
+                        <span class="import-project-name" id="import-active-project-name">None selected</span>
+                        <button type="button" class="toolbar-chip" id="import-switch-project">Switch project</button>
+                        <button type="button" class="toolbar-chip" id="import-new-project">New project</button>
+                    </div>
+
+                    <form class="import-form" id="import-form" novalidate>
+                        <div class="import-step required">
+                            <div class="import-step-header">
+                                <span class="import-step-number">1</span>
+                                <div>
+                                    <h3>Object Definitions <span class="import-required-badge">Required</span></h3>
+                                    <p>Go to Admin center -> Import &amp; Export Data -> Export Data -> Object definition.</p>
+                                    <p>Once downloaded upload the entire zip file.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-objectDefsZip" data-field="objectDefsZip" data-accept=".zip">
+                                <div class="import-drop-icon">📦</div>
+                                <div class="import-drop-label">Drop <code>.zip</code> here or <label class="import-drop-browse" for="file-objectDefsZip">browse</label></div>
+                                <input type="file" id="file-objectDefsZip" name="objectDefsZip" accept=".zip" class="import-file-input">
+                                <div class="import-drop-filename" id="fn-objectDefsZip"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="objectDefs" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 — RBP Files -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">2</span>
+                                <div>
+                                    <h3>Roles and Permissions <span class="import-optional-badge">Optional</span></h3>
+                                    <p>You will have to find a way to extract all role and permission information from page "Manage Permission Roles". A dedicated browser automation script is usually the most reliable approach.</p>
+                                    <p>The Script should capture all details, e.g: Name, User Type, Status, Actions, Permissions, ID, Assignment info: Access Population, Target Population, etc in the following formats:</p>
+                                    <p>You can import the rbp info as a combination of one or multiple <code>.csv</code>s, or one or multiple <code>.json</code>s, or both one <code>.csv</code> and one <code>.json</code> or multiple <code>.csv</code>s and multiple <code>.json</code>s. The ingestion engine will parse them.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-rbpFiles" data-field="rbpFiles" data-accept=".json,.csv" data-multi="true">
+                                <div class="import-drop-icon">🔐</div>
+                                <div class="import-drop-label">Drop RBP <code>.json</code> or <code>.csv</code> files here or <label class="import-drop-browse" for="file-rbpFiles">browse</label></div>
+                                <input type="file" id="file-rbpFiles" name="rbpFiles" accept=".json,.csv" multiple class="import-file-input">
+                                <div class="import-drop-filename" id="fn-rbpFiles"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="rbp" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">3</span>
+                                <div>
+                                    <h3>OData Metadata XML <span class="import-optional-badge">Optional</span></h3>
+                                    <p>Odata Metadata XML Download Instructions: Go to "OData API Metadata Refresh and Export" in SSFF and download.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-odataXml" data-field="odataXml" data-accept=".xml">
+                                <div class="import-drop-icon">🔗</div>
+                                <div class="import-drop-label">Drop <code>.xml</code> here or <label class="import-drop-browse" for="file-odataXml">browse</label></div>
+                                <input type="file" id="file-odataXml" name="odataXml" accept=".xml" class="import-file-input">
+                                <div class="import-drop-filename" id="fn-odataXml"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="odata" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 — Corporate + Country Data Models (single dropzone) -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">4</span>
+                                <div>
+                                    <h3>Corporate and country data model XML <span class="import-optional-badge">Optional</span></h3>
+                                    <p>Go to "Import/Export Corporate Data Model" and download. Do the same for Country/Region-specific (CSF) Corporate Data Model. Drop both files into the single zone below — the ingestion engine will classify each XML as Corporate (CDM) or Country-Specific (CSF) automatically.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-dataModelXmls" data-field="dataModelXmls" data-accept=".xml" data-multi="true">
+                                <div class="import-drop-icon">🏛️</div>
+                                <div class="import-drop-label">Drop Corporate (CDM) and Country-Specific (CSF) <code>.xml</code> files here or <label class="import-drop-browse" for="file-dataModelXmls">browse</label> (multi-select)</div>
+                                <input type="file" id="file-dataModelXmls" name="dataModelXmls" accept=".xml" multiple class="import-file-input">
+                                <div class="import-drop-filename" id="fn-dataModelXmls"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="dataModel" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 5 — Succession Data Models -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">5</span>
+                                <div>
+                                    <h3>Succession Data Model <span class="import-optional-badge">Optional</span></h3>
+                                    <p>Go to "Export Succession Data Model" and download. Do the same for Country/Region-Specific Data Model and upload both here at the same time.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-successionDms" data-field="successionDm" data-accept=".xml" data-multi="true">
+                                <div class="import-drop-icon">🧬</div>
+                                <div class="import-drop-label">Drop Succession and Country-specific <code>.xml</code> files here or <label class="import-drop-browse" for="file-successionDm">browse</label></div>
+                                <input type="file" id="file-successionDm" name="successionDm" accept=".xml" multiple class="import-file-input">
+                                <div class="import-drop-filename" id="fn-successionDm"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="successionDm" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 6 -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">6</span>
+                                <div>
+                                    <h3>Workflow configuration CSV <span class="import-optional-badge">Optional</span></h3>
+                                    <p>Workflow Configuration Download Instructions: Go to report center -> Create table report for Foundation Objects -> Select all columns EXCEPT time and date columns for the following table: "Workflow", download that <code>.csv</code>. Then delete all selected columns and repeat the selection and download process for these two different tables: Workflow Contributor, Workflow CC Role. Upload all 3 <code>.csv</code>s together here.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-workflowSplitCsvs" data-field="workflowSplitCsvs" data-accept=".csv" data-multi="true">
+                                <div class="import-drop-icon">⚙️</div>
+                                <div class="import-drop-label">Drop workflow <code>.csv</code> file(s) here or <label class="import-drop-browse" for="file-workflowSplitCsvs">browse</label></div>
+                                <input type="file" id="file-workflowSplitCsvs" name="workflowSplitCsvs" accept=".csv" multiple class="import-file-input">
+                                <div class="import-drop-filename" id="fn-workflowSplitCsvs"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="workflow" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 7 -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">7</span>
+                                <div>
+                                    <h3>Business Rules Export <span class="import-optional-badge">Optional</span></h3>
+                                    <p>Go back to import and export data -> Export data -> Rule.</p>
+                                    <p>Download and upload zip file here.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-rulesExport" data-field="rulesExport" data-accept=".csv,.zip">
+                                <div class="import-drop-icon">📋</div>
+                                <div class="import-drop-label">Drop business rules export <code>.zip</code> here or <label class="import-drop-browse" for="file-rulesExport">browse</label></div>
+                                <input type="file" id="file-rulesExport" name="rulesExport" accept=".csv,.zip" class="import-file-input">
+                                <div class="import-drop-filename" id="fn-rulesExport"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="rulesCatalog" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 8 -->
+                        <div class="import-step optional">
+                            <div class="import-step-header">
+                                <span class="import-step-number">8</span>
+                                <div>
+                                    <h3>Business Rules Assignments <span class="import-optional-badge">Optional</span></h3>
+                                    <p>Go to Configure Business Rules -> Click on "Export rules including assignment information as CSV file"</p>
+                                    <p>Download and upload csv here.</p>
+                                </div>
+                            </div>
+                            <div class="import-drop-zone" id="dz-businessRulesAssignmentsCsv" data-field="businessRulesAssignmentsCsv" data-accept=".csv">
+                                <div class="import-drop-icon">📌</div>
+                                <div class="import-drop-label">Drop assignments <code>.csv</code> here or <label class="import-drop-browse" for="file-businessRulesAssignmentsCsv">browse</label></div>
+                                <input type="file" id="file-businessRulesAssignmentsCsv" name="businessRulesAssignmentsCsv" accept=".csv" class="import-file-input">
+                                <div class="import-drop-filename" id="fn-businessRulesAssignmentsCsv"></div>
+                            </div>
+                            <div class="import-step-actions">
+                                <button type="button" class="toolbar-chip import-export-log" data-section="rulesAssignment" disabled>Export log</button>
+                            </div>
+                        </div>
+
+                        <!-- Profile detection strip -->
+                        <div class="import-detect-strip hidden" id="import-detect-strip">
+                            <div class="import-detect-inner">
+                                <span class="import-detect-label">Detected profile:</span>
+                                <span class="import-detect-pill" id="import-detect-pill"></span>
+                                <button type="button" class="toolbar-chip" id="import-detect-toggle">Show evidence</button>
+                            </div>
+                            <ul class="import-detect-evidence hidden" id="import-detect-evidence"></ul>
+                        </div>
+
+                        <div class="import-actions">
+                            <button type="button" class="toolbar-chip" id="import-detect-btn">Detect Profile</button>
+                            <button type="submit" class="import-submit" id="import-submit" disabled>Process Instance</button>
+                            <span class="import-submit-hint" id="import-submit-hint">Select a project and upload the Object Definitions zip to enable processing.</span>
+                        </div>
+                    </form>
+
+                    <div class="import-log hidden" id="import-log">
+                        <div class="import-log-header">
+                            <h4>Processing Log</h4>
+                            <button type="button" class="toolbar-chip" id="import-log-dismiss">Dismiss</button>
+                        </div>
+                        <div class="import-log-lines" id="import-log-lines"></div>
+                        <div class="import-log-actions hidden" id="import-log-actions">
+                            <button type="button" class="import-submit" id="import-load-project">Load this project</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── COMPARE WORKSPACE ─────────────────────────────────────── -->
+            <section id="workspace-compare" class="workspace-panel" hidden aria-labelledby="tab-compare">
+                <div class="workspace-page compare-workspace">
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title">Compare Instances</h2>
+                        <p class="workspace-page-lead">Diff structural and RBP metadata between two processed projects.</p>
+                    </header>
+                    <div id="compare-pickers-mount" class="compare-strip-mount"></div>
+                    <div id="compare-alerts-mount" class="compare-alerts-mount"></div>
+                    <div class="compare-shell-grid">
+                        <div class="compare-col-left">
+                            <div id="compare-overview-mount" class="compare-overview-mount"></div>
+                            <div id="compare-search-mount" class="compare-search-mount"></div>
+                            <div id="compare-worklist-mount" class="compare-worklist-mount"></div>
+                        </div>
+                        <div class="compare-col-right">
+                            <div class="compare-entity-panel" id="compare-entity-panel">
+                                <div id="compare-entity-hero-mount" class="compare-entity-hero-mount"></div>
+                                <div id="compare-action-toolbar-mount" class="compare-action-toolbar-mount"></div>
+                                <div id="compare-detail-mount" class="compare-detail-mount"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── PROJECTS WORKSPACE ────────────────────────────────────── -->
+            <section id="workspace-projects" class="workspace-panel" hidden aria-labelledby="tab-projects">
+                <div class="workspace-page projects-workspace">
+                    <header class="workspace-page-header">
+                        <h2 class="workspace-page-title">Projects</h2>
+                        <p class="workspace-page-lead">Each project represents one SuccessFactors instance. Switch between projects to load different metadata graphs.</p>
+                    </header>
+                    <div class="projects-toolbar">
+                        <button type="button" class="import-submit" id="projects-new-btn">New Project</button>
+                    </div>
+                    <div class="projects-list" id="projects-list">
+                        <div class="empty-mini">No projects yet. Create one to get started.</div>
+                    </div>
+                    <div class="new-project-form hidden" id="new-project-form">
+                        <h4>Create New Project</h4>
+                        <div class="new-project-row">
+                            <input type="text" id="new-project-name" placeholder="Instance name (e.g. Acme Corp Production)" class="new-project-input" maxlength="80">
+                            <button type="button" class="import-submit" id="new-project-create">Create</button>
+                            <button type="button" class="toolbar-chip" id="new-project-cancel">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="detail-page hidden" id="detail-page">
+        <div class="detail-page-header">
+            <button class="toolbar-button" id="detail-back" type="button">Back</button>
+            <div class="detail-page-title-wrap">
+                <div class="detail-page-eyebrow" id="detail-page-eyebrow">Node detail</div>
+                <div class="detail-page-project" id="detail-page-project" hidden></div>
+                <div class="detail-page-title" id="detail-page-title"></div>
+            </div>
+        </div>
+        <div class="detail-page-body" id="detail-page-body"></div>
+    </div>
+</body>
+</html>

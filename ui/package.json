@@ -1,0 +1,36 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite --config vite.config.ts --configLoader native",
+    "build": "vite build --config vite.config.ts --configLoader native",
+    "build:analyze": "vite build --config vite.config.ts --configLoader native --mode analyze",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@ui5/webcomponents": "^2.21.0",
+    "@ui5/webcomponents-fiori": "^2.21.0",
+    "@ui5/webcomponents-icons": "^2.21.0",
+    "d3": "^7.9.0",
+    "d3-zoom": "^3.0.0",
+    "elkjs": "^0.11.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "rollup-plugin-visualizer": "^5.14.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.8"
+  }
+}

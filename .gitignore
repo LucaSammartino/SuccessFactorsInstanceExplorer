@@ -1,0 +1,43 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+yarn.lock
+dist-runtime/
+
+# RBP Extraction output
+/rbp-permissions-raw.json
+/rbp-permissions-formatted.json
+
+# Generated export data — regenerate via ingest
+ui/data.json
+ui/dist/
+projects/
+
+# Maintainer-only sample/research bundles (never commit; users supply their own data)
+sample-data/
+SSFFArchitectureResearch/
+
+# Runtime logs
+*.log
+.npm-cache/
+.server.stdout.log
+
+# Local workspace state
+.obsidian/
+skills-lock.json
+# Typo / backup path that must never be tracked
+.claire/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor swap files
+.idea/
+*.swp
+*.swo
+*~

@@ -1,0 +1,326 @@
+/* =============================================================
+   SuccessFactors Instance Explorer Design System — Colors & Type
+   -------------------------------------------------------------
+   Mirrors the tokens in source/style.css. Extends them with
+   semantic typography and spacing roles so designers can drop
+   this file into any new surface and get a correct, on-brand
+   starting point.
+
+   Visual language: SAP UI5 / Fiori (Horizon theme family),
+   adapted with a lighter, more modern SuccessFactors Instance Explorer surface.
+   Typeface: SAP "72" — shipped in /fonts.
+   ============================================================= */
+
+/* --- Web fonts: SAP 72 (Regular / Light / Bold) -------------- */
+@font-face {
+    font-family: '72';
+    src: url('/fonts/72-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: '72';
+    src: url('/fonts/72-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: '72';
+    src: url('/fonts/72-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+/* 500/600 fall back to Regular with synthesized weight.
+   NOTE: SemiBold/Italic files are not publicly exposed by SAP's
+   CDN — if you have access to the SAP UI5 package, drop:
+     fonts/72-SemiBold.woff2  (weight 600)
+     fonts/72-Italic.woff2    (italic)
+   alongside the others and add matching @font-face blocks. */
+
+:root {
+    /* =================================================================
+       CORE PALETTE
+       ----------------------------------------------------------------
+       The app is light-on-light: a soft blue-grey radial sits behind
+       glassy white panels. `--accent` is the entire brand — the blue
+       that ties every interactive state together.
+       ================================================================= */
+    --accent:          #0b6cf2;   /* SAP Fiori-inspired primary blue */
+    --accent-strong:   #0957c7;   /* hover / press darken */
+    --accent-soft:     rgba(11, 108, 242, 0.12);
+    --accent-softer:   rgba(11, 108, 242, 0.08);
+
+    --surface:         #f5f7fb;   /* canvas behind cards */
+    --surface-strong:  #ffffff;   /* elevated card surface */
+    --surface-muted:   #eef3f9;   /* bottom of page gradient */
+    --surface-hover:   rgba(11, 108, 242, 0.06);
+
+    --border:          #d8e0eb;
+    --border-soft:     rgba(216, 224, 235, 0.7);
+
+    --text:            #122033;   /* body */
+    --text-strong:     #0a1422;   /* headings */
+    --muted:           #5f6e83;   /* captions, labels */
+    --muted-soft:      #8592a4;
+
+    /* Page background — a faint accent halo top-left that fades into
+       a cool vertical gradient. Use this on every full-page surface. */
+    --page-bg:
+        radial-gradient(circle at top left, rgba(11, 108, 242, 0.12), transparent 28%),
+        linear-gradient(180deg, #f9fbff 0%, #eef3f9 100%);
+
+    /* App shell + canvas — Horizon-style light workspace under a dark shell */
+    --app-shell-surface: #0a1628;
+    --app-page-bg:
+        radial-gradient(circle at 14% 0%, rgba(11, 108, 242, 0.07), transparent 40%),
+        linear-gradient(180deg, #f4f6f9 0%, #e8ecf1 100%);
+
+    /* Panel glass background — what sits behind the primary workspace. */
+    --panel-bg:
+        radial-gradient(circle at right top, rgba(12, 140, 171, 0.16), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(240, 245, 251, 0.96) 100%);
+
+    /* =================================================================
+       ENTITY / SEMANTIC COLORS
+       ----------------------------------------------------------------
+       The four-entity palette powers the graph, legends, badges,
+       matrix cells, and every facet filter. Every entity has a full
+       family: base / soft (8%) / medium (18%).
+       ================================================================= */
+    --mdf:          #0b6cf2;      /* MDF Object      — blue */
+    --mdf-soft:     rgba(11, 108, 242, 0.08);
+    --mdf-medium:   rgba(11, 108, 242, 0.18);
+
+    --rule:         #d97706;      /* Business Rule   — amber */
+    --rule-soft:    rgba(217, 119, 6, 0.08);
+    --rule-medium:  rgba(217, 119, 6, 0.18);
+
+    --role:         #be3b2b;      /* RBP Role        — red */
+    --role-soft:    rgba(190, 59, 43, 0.08);
+    --role-medium:  rgba(190, 59, 43, 0.18);
+
+    --odata:        #0c8cab;      /* OData Entity    — teal */
+    --odata-soft:   rgba(12, 140, 171, 0.08);
+    --odata-medium: rgba(12, 140, 171, 0.18);
+
+    --association:  #a5b4c7;      /* edge default */
+    --gateway:      #8f9dae;      /* gateway / anchor nodes */
+
+    /* Module-cluster colors (from ModuleClassifier — SF suite modules) */
+    --mod-ec:       #0b6cf2;      /* Employee Central */
+    --mod-ecp:     #2563eb;       /* EC Payroll */
+    --mod-rcm:     #7c3aed;       /* Recruiting */
+    --mod-onb:      #9333ea;      /* Onboarding */
+    --mod-pmgm:     #16a34a;      /* Performance / Goals */
+    --mod-sd:       #15803d;      /* Succession Development */
+    --mod-lms:      #059669;      /* Learning */
+    --mod-comp:     #d97706;      /* Compensation */
+    --mod-jpb:      #b45309;      /* Job Profile Builder */
+    --mod-plt:      #475569;      /* Platform */
+    --mod-ste:      #64748b;      /* Stack / Technology */
+    --mod-tih:      #0891b2;      /* Time-in-Hours */
+    --mod-wfa:      #0e7490;      /* Workforce Analytics */
+    --mod-unclassified: #94a3b8;
+
+    /* Diagnostic / status -------------------------------------------- */
+    --status-bg:    rgba(18, 32, 51, 0.8);   /* inverted chip */
+    --danger:       #9d2f2f;                 /* error / destructive emphasis */
+    --danger-soft:  rgba(177, 47, 47, 0.1);
+    --warn:         #d97706;
+    --warn-soft:    rgba(217, 119, 6, 0.12);
+    --ok:           #0e7490;
+    --ok-soft:      rgba(12, 140, 171, 0.1);
+
+    /* =================================================================
+       TYPOGRAPHY
+       ----------------------------------------------------------------
+       Scale matches the product (see source/style.css). SAP 72 is the
+       primary face; mono defaults are used for rule expressions,
+       object IDs, and diffs.
+       ================================================================= */
+    --font-sans: "72", "72full", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo",
+                 ui-monospace, monospace;
+
+    --fs-2xs:  0.6875rem;  /* 11px — sublabels, mono chips */
+    --fs-xs:   0.75rem;    /* 12px — table cells, badges, pills */
+    --fs-sm:   0.8125rem;  /* 13px — secondary text, metrics */
+    --fs-base: 0.875rem;   /* 14px — body, list items, inputs */
+    --fs-md:   1rem;       /* 16px — section headings */
+    --fs-lg:   1.25rem;    /* 20px — panel titles */
+    --fs-xl:   1.5rem;     /* 24px — detail hero title */
+    --fs-2xl:  1.8rem;     /* 29px — large stats */
+    --fs-3xl:  clamp(1.35rem, 2.4vw, 2rem);     /* detail page title */
+    --fs-hero: clamp(1.8rem, 3vw, 2.5rem);      /* overview hero */
+
+    --lh-tight:   1.1;
+    --lh-snug:    1.35;
+    --lh-normal:  1.5;
+    --lh-relaxed: 1.6;
+
+    --fw-light:    300;
+    --fw-regular:  400;
+    --fw-medium:   500;   /* synthetic — 72 doesn't ship 500 */
+    --fw-semibold: 600;   /* synthetic — use 700 for true bold */
+    --fw-bold:     700;
+
+    --tracking-wide:     0.04em;
+    --tracking-widest:   0.14em;    /* eyebrows */
+
+    /* =================================================================
+       SPACING
+       ================================================================= */
+    --sp-xs:  0.25rem;    /*  4px */
+    --sp-sm:  0.5rem;     /*  8px */
+    --sp-md:  0.75rem;    /* 12px */
+    --sp-lg:  1rem;       /* 16px */
+    --sp-xl:  1.5rem;     /* 24px */
+    --sp-2xl: 2rem;       /* 32px */
+    --sp-3xl: 2.5rem;     /* 40px */
+
+    /* =================================================================
+       CORNERS & ELEVATION
+       ----------------------------------------------------------------
+       SuccessFactors Instance Explorer uses unusually large radii (18–28px) on panels and
+       hero cards — this is part of its signature, softer-than-Fiori
+       feel. Buttons/pills go fully round.
+       ================================================================= */
+    --radius-sm:   8px;
+    --radius-md:   14px;
+    --radius-lg:   18px;
+    --radius-xl:   24px;
+    --radius-2xl:  28px;
+    --radius-full: 999px;
+
+    --panel-shadow:   0 18px 40px rgba(9, 26, 56, 0.08);
+    --card-shadow:    0 8px 28px rgba(15, 34, 58, 0.08);
+    --hover-shadow:   0 18px 32px rgba(9, 26, 56, 0.08);
+    --drop-shadow:    0 12px 24px rgba(9, 26, 56, 0.12);
+    --subtle-shadow:  0 4px 14px rgba(9, 26, 56, 0.06);
+
+    /* Blur amounts for glass chrome */
+    --blur-subtle: 8px;
+    --blur-panel:  12px;
+    --blur-strong: 18px;
+
+    /* Motion — keep transitions short & ease-standard */
+    --dur-fast:   0.12s;
+    --dur-base:   0.18s;
+    --dur-slow:   0.28s;
+    --ease:       ease;
+    --ease-out:   ease-out;
+
+    /* Z-index stops */
+    --z-shellbar: 100;
+    --z-workspace: 30;
+    --z-overlay:   50;
+    --z-detail:    200;
+}
+
+/* =================================================================
+   SEMANTIC TYPOGRAPHY ROLES
+   Wrap elements in these classes or extend them in your own CSS.
+   ================================================================= */
+
+html, body {
+    font-family: var(--font-sans);
+    color: var(--text);
+    font-size: var(--fs-base);
+    line-height: var(--lh-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.h1, h1 {
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-bold);
+    line-height: 1.04;
+    color: var(--text-strong);
+    margin: 0;
+}
+
+.h2, h2 {
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    color: var(--text-strong);
+    margin: 0;
+}
+
+.h3, h3 {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    margin: 0;
+}
+
+.h4, h4 {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-bold);
+    margin: 0;
+}
+
+.lead {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0.4rem 0 0;
+    max-width: 72ch;
+}
+
+.body, p {
+    font-size: var(--fs-base);
+    line-height: var(--lh-normal);
+    color: var(--text);
+    margin: 0;
+}
+
+.caption, .meta {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+}
+
+.eyebrow {
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: var(--fw-bold);
+    margin: 0;
+}
+
+.label-caps {
+    /* Used on metric labels, rail section headers, detail-metric labels */
+    font-size: var(--fs-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: var(--fw-bold);
+}
+
+.mono, code, kbd, pre {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+}
+
+pre {
+    padding: var(--sp-lg) var(--sp-xl);
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-xs);
+    line-height: 1.65;
+    overflow: auto;
+}
+
+.numeric-hero {
+    /* the giant accent numbers used in stat-cards and summary-cards */
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--accent);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}

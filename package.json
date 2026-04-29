@@ -1,0 +1,51 @@
+{
+  "name": "successfactors-instance-explorer",
+  "version": "1.1.1",
+  "description": "",
+  "main": "dist-runtime/main.js",
+  "scripts": {
+    "build:runtime": "tsc -p tsconfig.runtime.json",
+    "main": "npm run build:runtime && node dist-runtime/main.js",
+    "server": "node scripts/run-server.mjs",
+    "benchmark": "npm run build:runtime && node dist-runtime/scripts/manual/benchmark.js",
+    "graph-diff": "npm run build:runtime && node dist-runtime/scripts/manual/graph-diff.js",
+    "diff": "npm run build:runtime && node dist-runtime/scripts/manual/graph-diff.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SafetyRegulationsDoNotApplyHere/SuccessFactorsInstanceExplorer.git"
+  },
+  "keywords": [
+    "successfactors",
+    "sap",
+    "metadata",
+    "graph",
+    "visualization",
+    "offline",
+    "local-first"
+  ],
+  "author": "Luca <siempreluca@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/SafetyRegulationsDoNotApplyHere/SuccessFactorsInstanceExplorer/issues"
+  },
+  "homepage": "https://github.com/SafetyRegulationsDoNotApplyHere/SuccessFactorsInstanceExplorer#readme",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "csv-parser": "^3.2.0",
+    "express": "^4.21.2",
+    "fast-xml-parser": "^5.5.11",
+    "fs-extra": "^11.3.4",
+    "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/express": "^4.17.25",
+    "@types/fs-extra": "^11.0.4",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.6.0",
+    "typescript": "^5.9.3"
+  }
+}

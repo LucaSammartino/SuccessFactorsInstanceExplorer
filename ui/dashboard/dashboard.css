@@ -1,0 +1,323 @@
+/* React overview dashboard — uses global :root tokens from style.css */
+
+.dashboard-kit-root {
+    display: flex;
+    flex-direction: column;
+    min-height: min-content;
+    gap: var(--sp-lg);
+    padding: var(--sp-lg) var(--sp-xl);
+}
+
+.db-shell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--border);
+}
+
+.db-shell-eyebrow {
+    font-size: var(--fs-2xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+}
+
+.db-shell-title {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--text);
+}
+
+.db-shell-lead {
+    margin: 0;
+    max-width: 52rem;
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.db-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-md);
+}
+
+@media (max-width: 1100px) {
+    .db-kpi-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .db-kpi-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.db-kpi-card {
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--sp-lg);
+    box-shadow: var(--panel-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-xs);
+    min-height: 5.5rem;
+}
+
+.db-kpi-value {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+}
+
+.db-kpi-label {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.db-metrics-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-lg);
+    padding: var(--sp-md) var(--sp-lg);
+    background: rgba(11, 108, 242, 0.06);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.db-metrics-strip span {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+}
+
+.db-metrics-strip strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.db-panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--sp-lg);
+    align-items: start;
+}
+
+@media (max-width: 960px) {
+    .db-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+.db-panel {
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--panel-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.db-panel-header {
+    padding: var(--sp-md) var(--sp-lg);
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 247, 251, 0.9));
+}
+
+.db-panel-title {
+    margin: 0;
+    font-size: var(--fs-md);
+    font-weight: 700;
+    color: var(--text);
+}
+
+.db-panel-body {
+    padding: var(--sp-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-md);
+}
+
+.db-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-lg);
+}
+
+.db-coverage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+}
+
+.db-coverage-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.db-coverage-track {
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: rgba(95, 110, 131, 0.2);
+    overflow: hidden;
+}
+
+.db-coverage-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--accent), #3d8ff7);
+    transition: width 0.25s ease;
+}
+
+.db-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-sm) var(--sp-lg);
+}
+
+.db-metric-grid dt {
+    margin: 0;
+    font-size: var(--fs-xs);
+    color: var(--muted);
+}
+
+.db-metric-grid dd {
+    margin: 0;
+    text-align: right;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.db-module-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+}
+
+.db-module-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-md);
+    padding: var(--sp-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-align: left;
+    background: rgba(245, 247, 251, 0.6);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.db-module-row:hover {
+    background: var(--accent-soft);
+    border-color: rgba(11, 108, 242, 0.25);
+}
+
+.db-module-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.db-module-title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--text);
+}
+
+.db-module-stats {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    margin-top: var(--sp-xs);
+}
+
+.db-sub-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-xs);
+    margin-top: var(--sp-sm);
+}
+
+.db-sub-pill {
+    font-size: var(--fs-2xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(11, 108, 242, 0.1);
+    color: var(--accent);
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.db-sub-pill:hover {
+    background: rgba(11, 108, 242, 0.2);
+}
+
+.db-module-badge {
+    font-size: var(--fs-md);
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.db-ranked {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-xs);
+    max-height: 220px;
+    overflow: auto;
+}
+
+.db-ranked-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--sp-md);
+    padding: var(--sp-sm) var(--sp-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.db-ranked-item:hover {
+    background: rgba(11, 108, 242, 0.06);
+    border-color: var(--border);
+}
+
+.db-ranked-name {
+    font-size: var(--fs-xs);
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.db-ranked-badge {
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.db-empty {
+    padding: var(--sp-xl);
+    text-align: center;
+    color: var(--muted);
+    font-size: var(--fs-sm);
+}
+
+.db-empty strong {
+    color: var(--text);
+}

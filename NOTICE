@@ -1,0 +1,31 @@
+SuccessFactors Instance Explorer
+Copyright (c) 2026 Luca
+
+Licensed under the MIT License (see LICENSE).
+
+This product includes software developed by third parties:
+
+* SAP UI5 Web Components (@ui5/webcomponents, @ui5/webcomponents-fiori,
+  @ui5/webcomponents-icons, @ui5/webcomponents-icons-business-suite)
+  Copyright SAP SE
+  Licensed under the Apache License, Version 2.0
+  https://github.com/SAP/ui5-webcomponents
+
+* SAP Theming Base Content (@sap-theming/theming-base-content)
+  Copyright SAP SE
+  Licensed under the Apache License, Version 2.0
+  https://github.com/SAP/theming-base-content
+
+* D3.js (d3)
+  Copyright Mike Bostock
+  Licensed under the ISC License
+  https://d3js.org/
+
+* Express (express), Multer (multer), adm-zip, fast-xml-parser, csv-parser,
+  fs-extra, TypeScript, and other dependencies
+  declared in package.json and ui/package.json — each licensed under MIT,
+  Apache 2.0, ISC, or BSD as declared by their respective packages.
+
+"SAP" and "SuccessFactors" are trademarks of SAP SE. SuccessFactors Instance Explorer is not
+affiliated with, endorsed by, or sponsored by SAP. The names are used only in
+their nominative sense to describe the data formats this software ingests.
