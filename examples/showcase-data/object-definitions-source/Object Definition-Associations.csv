@@ -1,0 +1,2 @@
+id,associations.destObjectId,associations.name,associations.multiplicity,associations.type,associations.srcObjectFieldId,associations.destObjectFieldId,associations.visibility
+cust_ShowcaseRequest,cust_ShowcaseDepartment,department,ONE_TO_ONE,VALID_WHEN,department,externalCode,Editable

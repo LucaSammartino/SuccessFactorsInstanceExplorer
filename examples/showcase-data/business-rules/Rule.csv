@@ -1,0 +1,2 @@
+code,name,description,ruleType,scenarioCode,baseObject,body
+BR_SHOWCASE_REQUEST_DEFAULT_STATUS,Default request status,Sets an initial fake status for demo requests,Save Rule,SCENARIO_SHOWCASE,cust_ShowcaseRequest,"cust_ShowcaseRequest.status = ""Pending Review"";"

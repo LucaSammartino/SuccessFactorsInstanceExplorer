@@ -54,6 +54,13 @@ Then open `http://127.0.0.1:5174` in your browser.
 
 To wipe a project's data, delete its UUID folder under `projects/`.
 
+## Try the sample data
+
+Want to see the app without using client data? Import the fake bundle in
+[`examples/showcase-data/`](examples/showcase-data/). It includes one small
+Object Definitions zip plus matching RBP, OData, data model, workflow, and
+business-rule files for a screenshot-friendly demo project.
+
 ## What gets ingested
 
 The Import workspace exposes seven dropzones that map to the standard

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<country-specific-fields>
+  <country id="USA">
+    <hris-element id="cust_ShowcaseRequest">
+      <label>Showcase Request</label>
+      <hris-field id="localReviewer" visibility="both" required="false" type="string">
+        <label>Local Reviewer</label>
+      </hris-field>
+    </hris-element>
+  </country>
+</country-specific-fields>

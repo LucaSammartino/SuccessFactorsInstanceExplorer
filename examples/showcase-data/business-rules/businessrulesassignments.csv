@@ -1,0 +1,2 @@
+Rule ID,Rule Name,Assignment,Effective Start Date,Status,Scenario Code,Scenario,Base Object,Rule Type,Description
+BR_SHOWCASE_REQUEST_DEFAULT_STATUS,Default request status,Save rule on Showcase Request,2026-01-01,Active,SCENARIO_SHOWCASE,Showcase Save,cust_ShowcaseRequest,Save Rule,Sets initial status for demo requests

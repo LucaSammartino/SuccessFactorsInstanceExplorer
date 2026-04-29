@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<succession-data-model>
+  <hris-element id="personInfo">
+    <label>Showcase Person Info</label>
+    <hris-field id="customShowcaseFlag" visibility="both" required="false" type="string">
+      <label>Showcase Flag</label>
+    </hris-field>
+  </hris-element>
+</succession-data-model>

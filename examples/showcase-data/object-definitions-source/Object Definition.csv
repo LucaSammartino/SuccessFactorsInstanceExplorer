@@ -1,0 +1,6 @@
+id,label.defaultValue,description.defaultValue,objectCategory,apiVisibility,fields.name,fields.dataTypeStr,fields.required,fields.visibility,fields.label.defaultValue
+cust_ShowcaseRequest,Showcase Request,Fake request object for public demos,META_OR_CONFIG,Editable,externalCode,STRING,true,Editable,External Code
+cust_ShowcaseRequest,Showcase Request,Fake request object for public demos,META_OR_CONFIG,Editable,status,STRING,false,Editable,Status
+cust_ShowcaseRequest,Showcase Request,Fake request object for public demos,META_OR_CONFIG,Editable,department,GENERIC_OBJECT,false,Editable,Department
+cust_ShowcaseDepartment,Showcase Department,Fake department object for public demos,META_OR_CONFIG,Editable,externalCode,STRING,true,Editable,External Code
+cust_ShowcaseDepartment,Showcase Department,Fake department object for public demos,META_OR_CONFIG,Editable,name,STRING,true,Editable,Name

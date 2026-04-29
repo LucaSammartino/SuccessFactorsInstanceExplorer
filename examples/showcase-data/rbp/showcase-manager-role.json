@@ -1,0 +1,34 @@
+{
+  "roleId": "SHOWCASE_MANAGER",
+  "roleName": "Showcase Manager",
+  "status": "Active",
+  "userType": "Employee",
+  "permissions": [
+    {
+      "section": "User Permissions",
+      "category": "MDF Object Permissions",
+      "items": [
+        {
+          "name": "Showcase Request",
+          "subItems": [
+            {
+              "name": "status",
+              "access": "View | Edit"
+            },
+            {
+              "name": "department",
+              "access": "View"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "assignments": [
+    {
+      "ID": "AP_SHOWCASE_ALL",
+      "Name": "All Showcase Employees",
+      "Access Population": "Demo population"
+    }
+  ]
+}

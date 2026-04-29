@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<corporate-data-model>
+  <hris-element id="cust_ShowcaseRequest">
+    <label>Showcase Request</label>
+    <description>Fake request object for public demos.</description>
+    <hris-field id="externalCode" visibility="both" required="true" type="string">
+      <label>External Code</label>
+    </hris-field>
+    <hris-field id="status" visibility="both" required="false" type="string">
+      <label>Status</label>
+    </hris-field>
+    <hris-field id="department" visibility="both" required="false" type="string">
+      <label>Department</label>
+    </hris-field>
+  </hris-element>
+  <hris-element id="cust_ShowcaseDepartment">
+    <label>Showcase Department</label>
+    <description>Fake department object for public demos.</description>
+    <hris-field id="externalCode" visibility="both" required="true" type="string">
+      <label>External Code</label>
+    </hris-field>
+    <hris-field id="name" visibility="both" required="true" type="string">
+      <label>Name</label>
+    </hris-field>
+  </hris-element>
+</corporate-data-model>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">
+  <edmx:DataServices>
+    <Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:sap="http://www.sap.com/Protocols/SAPData" Namespace="SFOData">
+      <EntityType Name="cust_ShowcaseRequest">
+        <Key>
+          <PropertyRef Name="externalCode" />
+        </Key>
+        <Property Name="externalCode" Type="Edm.String" Nullable="false" />
+        <Property Name="status" Type="Edm.String" Nullable="true" />
+        <Property Name="department" Type="Edm.String" Nullable="true" />
+      </EntityType>
+      <EntityContainer Name="EntityContainer">
+        <EntitySet Name="cust_ShowcaseRequest" EntityType="SFOData.cust_ShowcaseRequest" sap:label="Showcase Request" sap:creatable="true" sap:updatable="true" sap:deletable="false" sap:upsertable="true">
+          <Documentation>
+            <Summary>Showcase Request</Summary>
+          </Documentation>
+        </EntitySet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
