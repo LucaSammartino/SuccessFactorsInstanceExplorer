@@ -78,7 +78,7 @@ export type AppState = {
     activeProjectId: string | null;
     activeProjectName: string | null;
     allProjects: ProjectMeta[];
-    importFiles: Record<string, FileList>;
+    importFiles: Record<string, FileList | File[]>;
     gatewayState: Map<string, boolean>;
     currentViewKind: ViewKind;
     lastNonRbpGraphView: ViewKind;

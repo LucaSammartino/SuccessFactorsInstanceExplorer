@@ -16,6 +16,8 @@ export { detectServer, fetchProjects, loadProject, updateProjectBadge, patchProj
 
 const INGEST_MULTIPART_FIELD_NAMES = new Set(INGEST_MULTIPART_FIELD_NAME_LIST);
 
+type ImportFileCollection = FileList | File[];
+
 function appendImportFilesToFormData(formData: FormData) {
     for (const [field, files] of Object.entries(S.importFiles)) {
         if (!INGEST_MULTIPART_FIELD_NAMES.has(field)) {
@@ -29,6 +31,11 @@ function appendImportFilesToFormData(formData: FormData) {
 }
 
 export function bindDropZones() {
+    const folderInput = document.getElementById('import-folder-input') as HTMLInputElement | null;
+    folderInput?.addEventListener('change', () => {
+        if (folderInput.files?.length) void applyImportFolder(folderInput.files);
+    });
+
     document.querySelectorAll('.import-drop-zone').forEach(zone => {
         const field = (zone as HTMLElement).dataset?.field;
         const input = zone.querySelector('input[type="file"]') as HTMLInputElement | null;
@@ -49,6 +56,176 @@ export function bindDropZones() {
             if (input.files?.length) applyImportFiles(field!, input.files, zone);
         });
     });
+}
+
+const IMPORT_FIELD_LABELS: Record<string, string> = {
+    objectDefsZip: 'Object definitions',
+    rbpFiles: 'Roles and permissions',
+    odataXml: 'OData metadata',
+    dataModelXmls: 'Data models',
+    successionDm: 'Succession data model',
+    workflowSplitCsvs: 'Workflows',
+    rulesExportCsv: 'Business rules',
+    rulesExportZip: 'Business rules',
+    businessRulesAssignmentsCsv: 'Rule assignments'
+};
+
+function setFolderStatus(message: string): void {
+    const status = document.getElementById('import-folder-status');
+    if (status) status.textContent = message;
+}
+
+function setImportField(filesByField: Record<string, File[]>, field: string, file: File, maxCount = Infinity): boolean {
+    const files = filesByField[field] || [];
+    if (files.length >= maxCount) return false;
+    files.push(file);
+    filesByField[field] = files;
+    return true;
+}
+
+async function readFileHead(file: File, byteLimit = 65536): Promise<string> {
+    try {
+        return await file.slice(0, byteLimit).text();
+    } catch {
+        return '';
+    }
+}
+
+function firstLine(text: string): string {
+    return (text.replace(/^\uFEFF/, '').match(/^[^\r\n]*/) || [''])[0].toLowerCase();
+}
+
+function looksLikeRbpCsv(base: string, header: string): boolean {
+    return (
+        base === 'rolespermissions.csv' ||
+        base === 'roletoruleinformation.csv' ||
+        base === 'roletopermission.csv' ||
+        base === 'roletomdfpermission.csv' ||
+        base === 'report_roles_report_example.csv' ||
+        (header.includes('role name') && (
+            header.includes('permission') ||
+            header.includes('target population') ||
+            header.includes('granted population')
+        ))
+    );
+}
+
+function looksLikeWorkflowCsv(base: string, rel: string, header: string): boolean {
+    return (
+        base === 'wfinfo.csv' ||
+        base === 'workflow.csv' ||
+        base === 'workflows.csv' ||
+        rel.includes('workflow') ||
+        rel.includes('wfinfo') ||
+        header.includes('wfstepapprover.approvertype') ||
+        header.includes('wfconfigstep.step-num')
+    );
+}
+
+async function classifyFolderFiles(files: File[]): Promise<{ filesByField: Record<string, File[]>; relevantCount: number; skippedCount: number; warnings: string[] }> {
+    const filesByField: Record<string, File[]> = {};
+    const warnings: string[] = [];
+    let relevantCount = 0;
+    let skippedCount = 0;
+
+    for (const file of files) {
+        const rel = (file.webkitRelativePath || file.name).toLowerCase();
+        const base = file.name.toLowerCase();
+        const ext = base.includes('.') ? base.slice(base.lastIndexOf('.')) : '';
+        let accepted = false;
+
+        if (ext === '.zip') {
+            if (rel.includes('rule')) {
+                accepted = setImportField(filesByField, 'rulesExportZip', file, 1);
+            } else {
+                accepted = setImportField(filesByField, 'objectDefsZip', file, 1);
+                if (!accepted) warnings.push(`Skipped extra zip: ${file.name}`);
+            }
+        } else if (ext === '.json') {
+            accepted = setImportField(filesByField, 'rbpFiles', file, 500);
+        } else if (ext === '.xml') {
+            const head = (await readFileHead(file)).toLowerCase();
+            if (rel.includes('odata') || rel.includes('metadata') || rel.includes('edmx') || head.includes('<edmx:') || head.includes('entityset')) {
+                accepted = setImportField(filesByField, 'odataXml', file, 1);
+                if (!accepted) warnings.push(`Skipped extra OData XML: ${file.name}`);
+            } else if (rel.includes('succession') || rel.includes('sdm') || head.includes('<succession-data-model')) {
+                accepted = setImportField(filesByField, 'successionDm', file, 20);
+            } else {
+                accepted = setImportField(filesByField, 'dataModelXmls', file, 40);
+            }
+        } else if (ext === '.csv') {
+            const header = firstLine(await readFileHead(file));
+            if (base === 'businessrulesassignments.csv' || rel.includes('businessrulesassignments') || rel.includes('assignment')) {
+                accepted = setImportField(filesByField, 'businessRulesAssignmentsCsv', file, 1);
+            } else if (base === 'rule.csv' || rel.includes('/rules/') || rel.includes('\\rules\\')) {
+                accepted = setImportField(filesByField, 'rulesExportCsv', file, 1);
+            } else if (looksLikeWorkflowCsv(base, rel, header)) {
+                accepted = setImportField(filesByField, 'workflowSplitCsvs', file, 20);
+            } else if (looksLikeRbpCsv(base, header)) {
+                accepted = setImportField(filesByField, 'rbpFiles', file, 500);
+            }
+        }
+
+        if (accepted) relevantCount += 1;
+        else skippedCount += 1;
+    }
+
+    if (!filesByField.objectDefsZip?.length) {
+        warnings.push('No Object Definitions zip was found. Processing can reuse a previous import for this project, but a new project needs that zip.');
+    }
+
+    return { filesByField, relevantCount, skippedCount, warnings };
+}
+
+function renderFolderScanSummary(skippedCount = 0, warnings: string[] = []): void {
+    const summary = document.getElementById('import-folder-summary');
+    const skipped = document.getElementById('import-folder-skipped');
+    const warningList = document.getElementById('import-folder-warnings');
+    if (!summary) return;
+
+    const entries = Object.entries(S.importFiles)
+        .filter(([, files]) => files.length > 0)
+        .map(([field, files]) => {
+            const label = IMPORT_FIELD_LABELS[field] || field;
+            const fileNames = Array.from(files as ImportFileCollection).map(f => f.name);
+            const visibleNames = fileNames.slice(0, 3).join(', ');
+            const suffix = fileNames.length > 3 ? ` +${fileNames.length - 3} more` : '';
+            return `<div class="import-folder-summary-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(visibleNames + suffix)}</strong></div>`;
+        });
+
+    if (entries.length === 0 && skippedCount === 0 && warnings.length === 0) {
+        summary.innerHTML = '';
+        summary.classList.add('hidden');
+        if (skipped) skipped.textContent = '';
+        if (warningList) {
+            warningList.innerHTML = '';
+            warningList.classList.add('hidden');
+        }
+        return;
+    }
+
+    summary.innerHTML = entries.length ? entries.join('') : '<div class="empty-mini">No supported files found in that folder.</div>';
+    summary.classList.remove('hidden');
+
+    if (skipped) {
+        skipped.textContent = skippedCount > 0 ? `${skippedCount} file${skippedCount === 1 ? '' : 's'} ignored.` : '';
+    }
+
+    if (warningList) {
+        warningList.innerHTML = warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('');
+        warningList.classList.toggle('hidden', warnings.length === 0);
+    }
+}
+
+export async function applyImportFolder(fileList: FileList): Promise<void> {
+    const files = Array.from(fileList);
+    S.importFiles = {};
+    setFolderStatus('Scanning folder...');
+    const { filesByField, relevantCount, skippedCount, warnings } = await classifyFolderFiles(files);
+    S.importFiles = filesByField;
+    setFolderStatus(relevantCount > 0 ? `Found ${relevantCount} relevant file${relevantCount === 1 ? '' : 's'}.` : 'No supported files found.');
+    renderFolderScanSummary(skippedCount, warnings);
+    updateImportSubmitState();
 }
 
 type IngestSection =
@@ -248,6 +425,7 @@ export function updateImportSubmitState() {
     const hint = document.getElementById('import-submit-hint');
     const hasProject = Boolean(S.activeProjectId);
     const hasObjectDefs = Boolean(S.importFiles.objectDefsZip?.length);
+    const selectedCount = Object.values(S.importFiles).reduce((total, files) => total + files.length, 0);
 
     if (!btn) return;
 
@@ -259,15 +437,16 @@ export function updateImportSubmitState() {
 
     (btn as any).disabled = false;
     if (hint) {
-        hint.textContent = hasObjectDefs
-            ? `Ready to process. Object Definitions zip detected.`
-            : `No zip selected — server will re-use the previously extracted files if available.`;
+        if (selectedCount === 0) hint.textContent = 'Choose a folder to scan its SuccessFactors exports.';
+        else if (hasObjectDefs) hint.textContent = 'Ready to process.';
+        else hint.textContent = 'No Object Definitions zip found. Processing can reuse a previous import for this project.';
     }
 }
 
 export function renderImportWorkspace() {
     updateProjectBadge();
     updateImportSubmitState();
+    renderFolderScanSummary();
     refreshExportLogButtonsForActiveProject();
 }
 

@@ -558,8 +558,8 @@
             <section id="workspace-import" class="workspace-panel" hidden aria-labelledby="tab-import">
                 <div class="workspace-page import-workspace">
                     <header class="workspace-page-header">
-                        <h2 class="workspace-page-title">Import Instance Files</h2>
-                        <p class="workspace-page-lead">Upload your SuccessFactors export files to process a new instance. Object Definitions zip is required; all other files are optional but unlock additional features.</p>
+                        <h2 class="workspace-page-title">Import Files</h2>
+                        <p class="workspace-page-lead">Choose one folder. The app scans it and prepares the instance locally.</p>
                     </header>
 
                     <div class="import-project-bar" id="import-project-bar">
@@ -570,168 +570,17 @@
                     </div>
 
                     <form class="import-form" id="import-form" novalidate>
-                        <div class="import-step required">
-                            <div class="import-step-header">
-                                <span class="import-step-number">1</span>
-                                <div>
-                                    <h3>Object Definitions <span class="import-required-badge">Required</span></h3>
-                                    <p>Go to Admin center -> Import &amp; Export Data -> Export Data -> Object definition.</p>
-                                    <p>Once downloaded upload the entire zip file.</p>
-                                </div>
+                        <div class="import-folder-card">
+                            <div class="import-folder-main">
+                                <h3>Choose the folder with your exports</h3>
+                                <p>The app will find the SuccessFactors files it can use.</p>
                             </div>
-                            <div class="import-drop-zone" id="dz-objectDefsZip" data-field="objectDefsZip" data-accept=".zip">
-                                <div class="import-drop-icon">📦</div>
-                                <div class="import-drop-label">Drop <code>.zip</code> here or <label class="import-drop-browse" for="file-objectDefsZip">browse</label></div>
-                                <input type="file" id="file-objectDefsZip" name="objectDefsZip" accept=".zip" class="import-file-input">
-                                <div class="import-drop-filename" id="fn-objectDefsZip"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="objectDefs" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 2 — RBP Files -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">2</span>
-                                <div>
-                                    <h3>Roles and Permissions <span class="import-optional-badge">Optional</span></h3>
-                                    <p>You will have to find a way to extract all role and permission information from page "Manage Permission Roles". A dedicated browser automation script is usually the most reliable approach.</p>
-                                    <p>The Script should capture all details, e.g: Name, User Type, Status, Actions, Permissions, ID, Assignment info: Access Population, Target Population, etc in the following formats:</p>
-                                    <p>You can import the rbp info as a combination of one or multiple <code>.csv</code>s, or one or multiple <code>.json</code>s, or both one <code>.csv</code> and one <code>.json</code> or multiple <code>.csv</code>s and multiple <code>.json</code>s. The ingestion engine will parse them.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-rbpFiles" data-field="rbpFiles" data-accept=".json,.csv" data-multi="true">
-                                <div class="import-drop-icon">🔐</div>
-                                <div class="import-drop-label">Drop RBP <code>.json</code> or <code>.csv</code> files here or <label class="import-drop-browse" for="file-rbpFiles">browse</label></div>
-                                <input type="file" id="file-rbpFiles" name="rbpFiles" accept=".json,.csv" multiple class="import-file-input">
-                                <div class="import-drop-filename" id="fn-rbpFiles"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="rbp" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">3</span>
-                                <div>
-                                    <h3>OData Metadata XML <span class="import-optional-badge">Optional</span></h3>
-                                    <p>Odata Metadata XML Download Instructions: Go to "OData API Metadata Refresh and Export" in SSFF and download.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-odataXml" data-field="odataXml" data-accept=".xml">
-                                <div class="import-drop-icon">🔗</div>
-                                <div class="import-drop-label">Drop <code>.xml</code> here or <label class="import-drop-browse" for="file-odataXml">browse</label></div>
-                                <input type="file" id="file-odataXml" name="odataXml" accept=".xml" class="import-file-input">
-                                <div class="import-drop-filename" id="fn-odataXml"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="odata" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 4 — Corporate + Country Data Models (single dropzone) -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">4</span>
-                                <div>
-                                    <h3>Corporate and country data model XML <span class="import-optional-badge">Optional</span></h3>
-                                    <p>Go to "Import/Export Corporate Data Model" and download. Do the same for Country/Region-specific (CSF) Corporate Data Model. Drop both files into the single zone below — the ingestion engine will classify each XML as Corporate (CDM) or Country-Specific (CSF) automatically.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-dataModelXmls" data-field="dataModelXmls" data-accept=".xml" data-multi="true">
-                                <div class="import-drop-icon">🏛️</div>
-                                <div class="import-drop-label">Drop Corporate (CDM) and Country-Specific (CSF) <code>.xml</code> files here or <label class="import-drop-browse" for="file-dataModelXmls">browse</label> (multi-select)</div>
-                                <input type="file" id="file-dataModelXmls" name="dataModelXmls" accept=".xml" multiple class="import-file-input">
-                                <div class="import-drop-filename" id="fn-dataModelXmls"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="dataModel" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 5 — Succession Data Models -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">5</span>
-                                <div>
-                                    <h3>Succession Data Model <span class="import-optional-badge">Optional</span></h3>
-                                    <p>Go to "Export Succession Data Model" and download. Do the same for Country/Region-Specific Data Model and upload both here at the same time.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-successionDms" data-field="successionDm" data-accept=".xml" data-multi="true">
-                                <div class="import-drop-icon">🧬</div>
-                                <div class="import-drop-label">Drop Succession and Country-specific <code>.xml</code> files here or <label class="import-drop-browse" for="file-successionDm">browse</label></div>
-                                <input type="file" id="file-successionDm" name="successionDm" accept=".xml" multiple class="import-file-input">
-                                <div class="import-drop-filename" id="fn-successionDm"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="successionDm" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 6 -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">6</span>
-                                <div>
-                                    <h3>Workflow configuration CSV <span class="import-optional-badge">Optional</span></h3>
-                                    <p>Workflow Configuration Download Instructions: Go to report center -> Create table report for Foundation Objects -> Select all columns EXCEPT time and date columns for the following table: "Workflow", download that <code>.csv</code>. Then delete all selected columns and repeat the selection and download process for these two different tables: Workflow Contributor, Workflow CC Role. Upload all 3 <code>.csv</code>s together here.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-workflowSplitCsvs" data-field="workflowSplitCsvs" data-accept=".csv" data-multi="true">
-                                <div class="import-drop-icon">⚙️</div>
-                                <div class="import-drop-label">Drop workflow <code>.csv</code> file(s) here or <label class="import-drop-browse" for="file-workflowSplitCsvs">browse</label></div>
-                                <input type="file" id="file-workflowSplitCsvs" name="workflowSplitCsvs" accept=".csv" multiple class="import-file-input">
-                                <div class="import-drop-filename" id="fn-workflowSplitCsvs"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="workflow" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 7 -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">7</span>
-                                <div>
-                                    <h3>Business Rules Export <span class="import-optional-badge">Optional</span></h3>
-                                    <p>Go back to import and export data -> Export data -> Rule.</p>
-                                    <p>Download and upload zip file here.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-rulesExport" data-field="rulesExport" data-accept=".csv,.zip">
-                                <div class="import-drop-icon">📋</div>
-                                <div class="import-drop-label">Drop business rules export <code>.zip</code> here or <label class="import-drop-browse" for="file-rulesExport">browse</label></div>
-                                <input type="file" id="file-rulesExport" name="rulesExport" accept=".csv,.zip" class="import-file-input">
-                                <div class="import-drop-filename" id="fn-rulesExport"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="rulesCatalog" disabled>Export log</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 8 -->
-                        <div class="import-step optional">
-                            <div class="import-step-header">
-                                <span class="import-step-number">8</span>
-                                <div>
-                                    <h3>Business Rules Assignments <span class="import-optional-badge">Optional</span></h3>
-                                    <p>Go to Configure Business Rules -> Click on "Export rules including assignment information as CSV file"</p>
-                                    <p>Download and upload csv here.</p>
-                                </div>
-                            </div>
-                            <div class="import-drop-zone" id="dz-businessRulesAssignmentsCsv" data-field="businessRulesAssignmentsCsv" data-accept=".csv">
-                                <div class="import-drop-icon">📌</div>
-                                <div class="import-drop-label">Drop assignments <code>.csv</code> here or <label class="import-drop-browse" for="file-businessRulesAssignmentsCsv">browse</label></div>
-                                <input type="file" id="file-businessRulesAssignmentsCsv" name="businessRulesAssignmentsCsv" accept=".csv" class="import-file-input">
-                                <div class="import-drop-filename" id="fn-businessRulesAssignmentsCsv"></div>
-                            </div>
-                            <div class="import-step-actions">
-                                <button type="button" class="toolbar-chip import-export-log" data-section="rulesAssignment" disabled>Export log</button>
-                            </div>
+                            <label class="import-folder-button" for="import-folder-input">Select Folder</label>
+                            <input type="file" id="import-folder-input" class="import-folder-input" webkitdirectory directory multiple>
+                            <div class="import-folder-status" id="import-folder-status">No folder selected.</div>
+                            <div class="import-folder-summary hidden" id="import-folder-summary"></div>
+                            <div class="import-folder-skipped" id="import-folder-skipped"></div>
+                            <ul class="import-folder-warnings hidden" id="import-folder-warnings"></ul>
                         </div>
 
                         <!-- Profile detection strip -->
@@ -745,9 +594,8 @@
                         </div>
 
                         <div class="import-actions">
-                            <button type="button" class="toolbar-chip" id="import-detect-btn">Detect Profile</button>
                             <button type="submit" class="import-submit" id="import-submit" disabled>Process Instance</button>
-                            <span class="import-submit-hint" id="import-submit-hint">Select a project and upload the Object Definitions zip to enable processing.</span>
+                            <span class="import-submit-hint" id="import-submit-hint">Select a project and choose a folder.</span>
                         </div>
                     </form>
 

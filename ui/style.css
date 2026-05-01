@@ -3860,6 +3860,94 @@ body.detail-mode .graph-shell-footer {
     gap: 1.2rem;
 }
 
+.import-folder-card {
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.import-folder-main h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.import-folder-main p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.import-folder-button {
+    justify-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.4rem;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.import-folder-button:hover {
+    opacity: 0.88;
+}
+
+.import-folder-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.import-folder-status,
+.import-folder-skipped {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.import-folder-summary {
+    display: grid;
+    gap: 0.45rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.9rem;
+}
+
+.import-folder-summary-row {
+    display: grid;
+    grid-template-columns: minmax(9rem, 0.42fr) 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-size: 0.8rem;
+}
+
+.import-folder-summary-row span {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.import-folder-summary-row strong {
+    color: var(--text);
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.import-folder-warnings {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: #92400e;
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
 .import-step {
     background: var(--surface-strong);
     border: 1px solid var(--border);
